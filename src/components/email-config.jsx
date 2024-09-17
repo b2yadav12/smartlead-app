@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Form, Input, Button, Radio, Col, Row, Flex, Checkbox } from 'antd';
+import PropTypes from 'prop-types';
+import { Form, Input, Button, Radio, Col, Row, Flex, Checkbox, message } from 'antd';
 import { EMAIL_CONFIG_FORM_FIELDS } from '../constants';
+import { saveEmailConfig, getEmailConfig } from "../services/email";
 
 const {
 	EMAIL_ENCRYPTION_TYPES,
@@ -10,27 +12,72 @@ const {
 	DEFAULT_MESSAGE_PER_DAY,
 } = EMAIL_CONFIG_FORM_FIELDS;
 
-const EmailConfig = () => {
-	const [form] = Form.useForm();
-	const formValues = Form.useWatch([], form);
-
-	const [formInitialValues, setInitialValues] = useState({
+const getInitialFormValues = () => {
+	return {
 		smtpPort: DEFAULT_SMTP_PORT,
 		smtpEncryption: DEFAULT_SMTP_ENCRYPTION,
 		messagePerDay: DEFAULT_MESSAGE_PER_DAY,
 		imapPort: DEFAULT_IMAP_PORT
-	});
+	};
+}
+
+
+const EmailConfig = ({ updateEmailConfigId }) => {
+	const [form] = Form.useForm();
+	const formValues = Form.useWatch([], form);
+	const [isSubmitDisable, setIsSubmitDisable] = useState(true); // enable/disable state for save button
 
 	useEffect(() => {
-		console.log(`formValues`, formValues);
-	}, [formValues]);
+		fetchInitialData();
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
+
+	useEffect(() => {
+		form
+			.validateFields({ validateOnly: true })
+			.then(() => setIsSubmitDisable(false))
+			.catch(() => {
+				setIsSubmitDisable(true);
+			})
+	}, [form, formValues]);
+
+	/**
+	 * if emailConfigurationId is found then fetch the corresponding email configuration data and sets the form fields.
+	*/
+	const fetchInitialData = async () => {
+		const savedEmailConfigId = localStorage.getItem('emailConfigId');
+
+		if (savedEmailConfigId) {
+			const savedData = await getEmailConfig(savedEmailConfigId);
+			form.setFieldsValue(savedData);
+		}
+	}
+
+	const onSubmitForm = async () => {
+		const data = { ...formValues, id: localStorage.getItem('emailConfigId') };
+
+		delete data.isReplyToDifferentEmail;
+
+		try {
+			const savedData = await saveEmailConfig({ payload: data });
+
+			message.success("Email configuration saved successfully");
+
+			form.setFieldsValue(savedData);
+			updateEmailConfigId(savedData.id);
+		} catch (error) {
+			message.error(error.message);
+			console.log(`Error while saving configuration`, error);
+		}
+	}
 
 	return (
 		<Form
 			form={form}
 			layout="vertical"
 			name="emailSettings"
-			initialValues={{ ...formInitialValues }}
+			initialValues={getInitialFormValues()}
+			onFinish={onSubmitForm}
 		>
 			<Row gutter={16}>
 				<Col span={12}>
@@ -160,10 +207,6 @@ const EmailConfig = () => {
 							{
 								pattern: /^[0-9]*$/,
 								message: 'Please enter valid number',
-							},
-							{
-								max: 200,
-								message: 'Please enter less than 200',
 							}
 						]}
 					>
@@ -260,12 +303,16 @@ const EmailConfig = () => {
 			</>}
 
 			<Form.Item>
-				<Button type="primary" htmlType="submit">
+				<Button disabled={isSubmitDisable} type="primary" htmlType="submit">
 					Save Settings
 				</Button>
 			</Form.Item>
 		</Form>
 	);
+};
+
+EmailConfig.propTypes = {
+	updateEmailConfigId: PropTypes.func.isRequired,
 };
 
 export default EmailConfig;
