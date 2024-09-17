@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Form, Input, Button, Radio, Col, Row, Flex, Checkbox, message } from 'antd';
 import { EMAIL_CONFIG_FORM_FIELDS } from '../constants';
 import { saveEmailConfig, getEmailConfig } from "../services/email";
+import Loader from "./Loader";
 
 const {
 	EMAIL_ENCRYPTION_TYPES,
@@ -26,6 +27,7 @@ const EmailConfig = ({ updateEmailConfigId }) => {
 	const [form] = Form.useForm();
 	const formValues = Form.useWatch([], form);
 	const [isSubmitDisable, setIsSubmitDisable] = useState(true); // enable/disable state for save button
+	const [isLoading, setIsLoading] = useState(false);
 
 	useEffect(() => {
 		fetchInitialData();
@@ -48,8 +50,16 @@ const EmailConfig = ({ updateEmailConfigId }) => {
 		const savedEmailConfigId = localStorage.getItem('emailConfigId');
 
 		if (savedEmailConfigId) {
-			const savedData = await getEmailConfig(savedEmailConfigId);
-			form.setFieldsValue(savedData);
+			try {
+				setIsLoading(true);
+				const savedData = await getEmailConfig(savedEmailConfigId);
+				form.setFieldsValue(savedData);
+			} catch (error) {
+				updateEmailConfigId('');
+				message.error(error.message);
+			} finally {
+				setIsLoading(false);
+			}			
 		}
 	}
 
@@ -59,6 +69,7 @@ const EmailConfig = ({ updateEmailConfigId }) => {
 		delete data.isReplyToDifferentEmail;
 
 		try {
+			setIsLoading(true);
 			const savedData = await saveEmailConfig({ payload: data });
 
 			message.success("Email configuration saved successfully");
@@ -67,7 +78,8 @@ const EmailConfig = ({ updateEmailConfigId }) => {
 			updateEmailConfigId(savedData.id);
 		} catch (error) {
 			message.error(error.message);
-			console.log(`Error while saving configuration`, error);
+		} finally {
+			setIsLoading(false);
 		}
 	}
 
@@ -79,6 +91,7 @@ const EmailConfig = ({ updateEmailConfigId }) => {
 			initialValues={getInitialFormValues()}
 			onFinish={onSubmitForm}
 		>
+			{isLoading && <Loader />}
 			<Row gutter={16}>
 				<Col span={12}>
 					<Form.Item

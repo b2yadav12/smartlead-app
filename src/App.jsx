@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Tabs, Card } from 'antd';
 import EmailConfig from './components/email-config';
+import SendEmail from './components/email-body';
 
 const TABS = {
   emailConfigPage: {
@@ -34,8 +35,13 @@ function App() {
   }, [emailConfigId])
 
   const updateEmailConfigId = (id) => {
-    localStorage.setItem('emailConfigId', id);
-    setEmailConfigId(id);
+    if(!id) {
+      localStorage.removeItem('emailConfigId');
+      setEmailConfigId('');
+    } else {
+      localStorage.setItem('emailConfigId', id);
+      setEmailConfigId(id);
+    }    
   }
 
   return (
@@ -52,7 +58,7 @@ function App() {
             disabled: tab.disabled,
             children: tab.key === TABS.emailConfigPage.key 
               ? <EmailConfig updateEmailConfigId={updateEmailConfigId} /> 
-              : <Card>Send Email Page</Card>
+              : <SendEmail />
           }))}
         />
       </Card>

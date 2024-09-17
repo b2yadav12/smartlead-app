@@ -20,7 +20,7 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
-const httpLink = new HttpLink({ uri: 'http://localhost:8000/graphql' });
+const httpLink = new HttpLink({ uri: import.meta.env.VITE_API_URL });
 const link = ApolloLink.from([authLink, httpLink]);
 
 export const httpClient = new ApolloClient({

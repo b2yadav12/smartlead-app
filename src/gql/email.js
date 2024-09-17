@@ -23,7 +23,7 @@ export const SAVE_EMAIL_CONFIG = gql`
 `;
 
 export const GET_EMAIL_CONFIG = gql`
-  query GetEmailConfig($id: String) {
+  query GetEmailConfig($id: String!) {
     getEmailConfig(id: $id) {
       id
       fromName
@@ -40,6 +40,15 @@ export const GET_EMAIL_CONFIG = gql`
       imapHost
       imapPort
       imapEncryption
+    }
+  }
+`;
+
+export const SEND_EMAIL = gql`
+  mutation SendEmail($payload: SendEmail!) {
+    sendEmail(payload: $payload) {
+      status
+      message
     }
   }
 `;
