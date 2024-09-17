@@ -63,10 +63,24 @@ const EmailConfig = ({ updateEmailConfigId }) => {
 		}
 	}
 
+	const handleValuesChange = (changedValues) => {
+		if (changedValues.smtpPort) {
+			form.setFieldValue('smtpPort', parseInt(changedValues.smtpPort));
+		} else if(changedValues.imapPort) {
+			form.setFieldValue('imapPort', parseInt(changedValues.imapPort));
+		} else if(changedValues.messagePerDay) {
+			form.setFieldValue('messagePerDay', parseInt(changedValues.messagePerDay));
+		} else if(changedValues.minTimeGap) {
+			form.setFieldValue('minTimeGap', parseInt(changedValues.minTimeGap));
+		}
+	  };
+
 	const onSubmitForm = async () => {
 		const data = { ...formValues, id: localStorage.getItem('emailConfigId') };
 
+		data.useDifferentEmailForImap = data.useDifferentEmail;
 		delete data.isReplyToDifferentEmail;
+		delete data.useDifferentEmail;
 
 		try {
 			setIsLoading(true);
@@ -89,6 +103,7 @@ const EmailConfig = ({ updateEmailConfigId }) => {
 			layout="vertical"
 			name="emailSettings"
 			initialValues={getInitialFormValues()}
+			onValuesChange={handleValuesChange}
 			onFinish={onSubmitForm}
 		>
 			{isLoading && <Loader />}
