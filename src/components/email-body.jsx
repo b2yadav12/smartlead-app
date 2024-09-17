@@ -16,8 +16,8 @@ const SendEmail = () => {
 		form
 			.validateFields({ validateOnly: true })
 			.then(() => setIsSubmitDisable(false))
-			.catch(() => {
-				setIsSubmitDisable(true);
+			.catch((err) => {
+				setIsSubmitDisable(err.errorFields?.length > 0);
 			})
 	}, [form, formValues]);
 

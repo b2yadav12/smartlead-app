@@ -31,15 +31,15 @@ const EmailConfig = ({ updateEmailConfigId }) => {
 
 	useEffect(() => {
 		fetchInitialData();
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	useEffect(() => {
 		form
 			.validateFields({ validateOnly: true })
 			.then(() => setIsSubmitDisable(false))
-			.catch(() => {
-				setIsSubmitDisable(true);
+			.catch((err) => {
+				setIsSubmitDisable(err.errorFields?.length > 0);
 			})
 	}, [form, formValues]);
 
@@ -53,27 +53,34 @@ const EmailConfig = ({ updateEmailConfigId }) => {
 			try {
 				setIsLoading(true);
 				const savedData = await getEmailConfig(savedEmailConfigId);
+
+				if(savedData.useDifferentEmailForImap) {
+					savedData.useDifferentEmail = savedData.useDifferentEmailForImap;
+				}
+				if(savedData.replyToEmail) {
+					savedData.isReplyToDifferentEmail = true;
+				}
 				form.setFieldsValue(savedData);
 			} catch (error) {
 				updateEmailConfigId('');
 				message.error(error.message);
 			} finally {
 				setIsLoading(false);
-			}			
+			}
 		}
 	}
 
 	const handleValuesChange = (changedValues) => {
 		if (changedValues.smtpPort) {
 			form.setFieldValue('smtpPort', parseInt(changedValues.smtpPort));
-		} else if(changedValues.imapPort) {
+		} else if (changedValues.imapPort) {
 			form.setFieldValue('imapPort', parseInt(changedValues.imapPort));
-		} else if(changedValues.messagePerDay) {
+		} else if (changedValues.messagePerDay) {
 			form.setFieldValue('messagePerDay', parseInt(changedValues.messagePerDay));
-		} else if(changedValues.minTimeGap) {
+		} else if (changedValues.minTimeGap) {
 			form.setFieldValue('minTimeGap', parseInt(changedValues.minTimeGap));
 		}
-	  };
+	};
 
 	const onSubmitForm = async () => {
 		const data = { ...formValues, id: localStorage.getItem('emailConfigId') };
