@@ -22,7 +22,10 @@ const getInitialFormValues = () => {
 	};
 }
 
-
+/**
+ * EmailConfig component allows users to configure SMTP and IMAP settings, including encryption types, ports, and credentials.
+ * The component fetches initial data if an email configuration ID is found in local storage then prefilled form fields.
+*/
 const EmailConfig = ({ updateEmailConfigId }) => {
 	const [form] = Form.useForm();
 	const formValues = Form.useWatch([], form);
@@ -34,6 +37,7 @@ const EmailConfig = ({ updateEmailConfigId }) => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
+	// Validate form fields and enable/disable save button
 	useEffect(() => {
 		form
 			.validateFields({ validateOnly: true })
@@ -70,6 +74,7 @@ const EmailConfig = ({ updateEmailConfigId }) => {
 		}
 	}
 
+	// parsing form fields from string to required data types
 	const handleValuesChange = (changedValues) => {
 		if (changedValues.smtpPort) {
 			form.setFieldValue('smtpPort', parseInt(changedValues.smtpPort));
@@ -82,6 +87,7 @@ const EmailConfig = ({ updateEmailConfigId }) => {
 		}
 	};
 
+	// Save email configuration data
 	const onSubmitForm = async () => {
 		const data = { ...formValues, id: localStorage.getItem('emailConfigId') };
 
@@ -346,6 +352,9 @@ const EmailConfig = ({ updateEmailConfigId }) => {
 	);
 };
 
+/*
+	updateEmailConfigId: function to update email configuration ID once the email configuration is saved
+*/
 EmailConfig.propTypes = {
 	updateEmailConfigId: PropTypes.func.isRequired,
 };

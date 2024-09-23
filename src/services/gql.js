@@ -1,4 +1,4 @@
-import { httpClient } from '../apolloClient';
+import { httpClient } from './apolloClient';
 
 const handleErr = (error) => {
   throw new Error(error.graphQLErrors[0].message)

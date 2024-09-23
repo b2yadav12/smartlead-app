@@ -5,6 +5,10 @@ import 'react-quill/dist/quill.snow.css';
 import { sendEmail } from "../services/email";
 import Loader from "./Loader";
 
+/**
+ * This component provides a form for sending emails. It includes fields for the recipient's email address,
+ * the subject, and the body of the email. The body of the email is created using the ReactQuill editor.
+ */
 const SendEmail = () => {
 	const [form] = Form.useForm();
 	const formValues = Form.useWatch([], form);
