@@ -1,4 +1,4 @@
-import { mutation } from './gql';
+import { mutation, query } from './gql';
 import { SAVE_EMAIL_CONFIG, GET_EMAIL_CONFIG, SEND_EMAIL } from "../gql";
 
 export const saveEmailConfig = async (payload) => {
@@ -7,7 +7,7 @@ export const saveEmailConfig = async (payload) => {
 };
 
 export const getEmailConfig = async (id) => {
-	const data = await mutation(GET_EMAIL_CONFIG, { id });
+	const data = await query(GET_EMAIL_CONFIG, { id });
 	return data.getEmailConfig;
 };
 
